@@ -18,8 +18,6 @@ import "C"
 import (
 	"syscall"
 	"unsafe"
-
-	"github.com/k0kubun/pp"
 )
 
 type Converter struct {
@@ -81,8 +79,11 @@ func (this *Converter) Close() (err error) {
 func (this *Converter) Convert(input []byte, output []byte) (bytesRead int, bytesWritten int, err error) {
 	// make sure we are still open
 	if this.open {
-		inputLeft := C.size_t(len(input))
-		outputLeft := C.size_t(len(output))
+		inputLen := len(input)
+		inputLeft := C.size_t(inputLen)
+
+		outputLen := len(output)
+		outputLeft := C.size_t(outputLen)
 
 		if inputLeft > 0 && outputLeft > 0 {
 			// we have to give iconv a pointer to a pointer of the underlying
@@ -91,10 +92,6 @@ func (this *Converter) Convert(input []byte, output []byte) (bytesRead int, byte
 			inputPointer := (*C.char)(unsafe.Pointer(&input[0]))
 			outputPointer := (*C.char)(unsafe.Pointer(&output[0]))
 
-			pp.Println(inputPointer)
-			pp.Println(inputLeft)
-			pp.Println(outputPointer)
-			pp.Println(outputLeft)
 			_, err = C.call_iconv(this.context, inputPointer, &inputLeft, outputPointer, &outputLeft)
 
 			// update byte counters

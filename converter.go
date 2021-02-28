@@ -15,8 +15,12 @@ size_t call_iconv(iconv_t ctx, char *in, size_t *size_in, char *out, size_t *siz
 
 */
 import "C"
-import "syscall"
-import "unsafe"
+import (
+	"syscall"
+	"unsafe"
+
+	"github.com/k0kubun/pp"
+)
 
 type Converter struct {
 	context C.iconv_t
@@ -87,6 +91,10 @@ func (this *Converter) Convert(input []byte, output []byte) (bytesRead int, byte
 			inputPointer := (*C.char)(unsafe.Pointer(&input[0]))
 			outputPointer := (*C.char)(unsafe.Pointer(&output[0]))
 
+			pp.Println(inputPointer)
+			pp.Println(inputLeft)
+			pp.Println(outputPointer)
+			pp.Println(outputLeft)
 			_, err = C.call_iconv(this.context, inputPointer, &inputLeft, outputPointer, &outputLeft)
 
 			// update byte counters

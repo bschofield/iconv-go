@@ -3,9 +3,10 @@ package main
 import (
 	"encoding/hex"
 	"fmt"
-	iconv "github.com/djimenez/iconv-go"
 	"io/ioutil"
 	"os"
+
+	iconv "github.com/bschofield/iconv-go"
 )
 
 func main() {

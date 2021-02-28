@@ -15,8 +15,10 @@ size_t call_iconv(iconv_t ctx, char *in, size_t *size_in, char *out, size_t *siz
 
 */
 import "C"
-import "syscall"
-import "unsafe"
+import (
+	"syscall"
+	"unsafe"
+)
 
 type Converter struct {
 	context C.iconv_t
@@ -84,22 +86,19 @@ func (this *Converter) Convert(input []byte, output []byte) (bytesRead int, byte
 			// we have to give iconv a pointer to a pointer of the underlying
 			// storage of each byte slice - so far this is the simplest
 			// way i've found to do that in Go, but it seems ugly
-			inputPointer := (*C.char)(unsafe.Pointer(&input[0]))
-			outputPointer := (*C.char)(unsafe.Pointer(&output[0]))
-
-			_, err = C.call_iconv(this.context, inputPointer, &inputLeft, outputPointer, &outputLeft)
+			_, err = C.call_iconv(this.context, (*C.char)(unsafe.Pointer(&input[0])), &inputLeft, (*C.char)(unsafe.Pointer(&output[0])), &outputLeft)
 
 			// update byte counters
 			bytesRead = len(input) - int(inputLeft)
 			bytesWritten = len(output) - int(outputLeft)
+
 		} else if inputLeft == 0 && outputLeft > 0 {
 			// inputPointer will be nil, outputPointer is generated as above
-			outputPointer := (*C.char)(unsafe.Pointer(&output[0]))
-
-			_, err = C.call_iconv(this.context, nil, &inputLeft, outputPointer, &outputLeft)
+			_, err = C.call_iconv(this.context, nil, &inputLeft, (*C.char)(unsafe.Pointer(&output[0])), &outputLeft)
 
 			// update write byte counter
 			bytesWritten = len(output) - int(outputLeft)
+
 		} else {
 			// both input and output are zero length, do a shift state reset
 			_, err = C.call_iconv(this.context, nil, &inputLeft, nil, &outputLeft)
